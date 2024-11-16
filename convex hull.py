@@ -12,17 +12,13 @@ def merge(left,right):
     while True:
         maxintercept=intercept(nodeleft,noderight,x0)
         prev_left=left[left.index(nodeleft)-1]
-        changed=False
-        if(intercept(prev_left,noderight,x0)>maxintercept):
+        if(intercept(prev_left,noderight,x0)>maxintercept):#左部凸包逆时针更新
             nodeleft=prev_left
-            changed=True
             continue
         next_right=right[(right.index(noderight)+1)%len(right)]
         if(intercept(nodeleft,next_right,x0)>maxintercept):
             noderight=next_right
-            changed=True
             continue
-        #if not changed:
         break
     upper_node_left=nodeleft
     upper_node_right=noderight
@@ -31,17 +27,13 @@ def merge(left,right):
     while True:
         minintercept=intercept(nodeleft,noderight,x0)
         prev_left=left[left.index(nodeleft)-1]
-        changed=False
-        if(intercept(prev_left,noderight,x0)<minintercept):
+        if(intercept(prev_left,noderight,x0)<minintercept):#左部凸包逆时针更新
             nodeleft=prev_left
-            changed=True
             continue
         next_right=right[(right.index(noderight)+1)%len(right)]
-        if(intercept(nodeleft,next_right,x0)<minintercept):
+        if(intercept(nodeleft,next_right,x0)<minintercept):#右部凸包顺时针更新
             noderight=next_right
-            changed=True
             continue
-        #if not changed:
         break
     lower_node_left=nodeleft
     lower_node_right=noderight
@@ -59,10 +51,12 @@ def merge(left,right):
             break;
         i=(i+1)%len(left)
     return result
-def cross_product(a,b,c):
+def cross_product(a,b,c):#计算叉积判断三点的顺时针方向
     return (b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x)
 def convex_hull(nodes):
-    if(len(nodes)<=2):
+    if all(nodes[0].x==i.x for i in nodes):#处理所有点横坐标相同的情况
+        return deque(sorted(nodes,key=lambda node:node.y))
+    elif(len(nodes)<=2):
         result=deque(nodes)
         return result
     elif(len(nodes)==3):
@@ -77,11 +71,14 @@ def convex_hull(nodes):
             result.append(nodes[1])
         return result
     else:
-        Nodes=sorted(nodes,key=lambda node:node.x)
-        left=deque(Nodes[:len(Nodes)//2])
-        right=deque(Nodes[len(Nodes)//2:])
+        Nodes=sorted(nodes,key=lambda node:(node.x,node.y))
+        mid_x=Nodes[len(Nodes)//2].x
+        left=deque(p for p in Nodes if p.x<mid_x)
+        right=deque(p for p in Nodes if p.x>mid_x)
+        middle=deque(p for p in Nodes if p.x==mid_x)
+        right=middle+right#把横坐标相等的点放在同一组以规避斜率无穷大的情况
         return merge(convex_hull(left),convex_hull(right))
-node1=node(1, 2)    # 内部点
+node1=node(0, 2)    # 内部点
 node0=node(0, 0)   # 凸包顶点
 node6=node(6, 3)    # 凸包顶点
 node2=node(2, 7)     # 凸包顶点
