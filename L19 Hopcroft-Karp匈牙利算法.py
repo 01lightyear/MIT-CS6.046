@@ -1,3 +1,6 @@
+'''
+对于二分图中找到最大的两端点一一对应（需要通过中间的边）
+'''
 from collections import deque
 def hopcroft_karp(U,V,E):
     adj={u:[] for u in U}
